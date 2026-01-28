@@ -88,11 +88,11 @@ export default function RepoTable({ repositories }: RepoTableProps) {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-display font-bold text-foreground">
+            <h2 className="text-xl font-display font-extrabold text-foreground">
               Repository Insights
             </h2>
-            <p className="text-xs text-muted mt-1">
-              Public repositories sorted by relevance and activity
+            <p className="text-xs text-muted mt-1.5">
+              Showcasing public work, sorted by impact and recency
             </p>
           </div>
 
@@ -180,13 +180,16 @@ export default function RepoTable({ repositories }: RepoTableProps) {
                 const status = getRepoStatus(repo);
                 const isTopRepo = index === 0 && sortBy === "stars";
                 const isRecentRepo = index === 0 && sortBy === "recent";
+                const isArchived = status.label === "Archived";
 
                 return (
                   <tr
                     key={repo.id}
                     className={`border-b border-border/50 hover:bg-accent/5 transition-colors ${
-                      isTopRepo || isRecentRepo ? "bg-accent/5" : ""
-                    }`}
+                      isTopRepo || isRecentRepo
+                        ? "bg-accent/5 ring-1 ring-accent/10"
+                        : ""
+                    } ${isArchived ? "opacity-50" : ""}`}
                   >
                     <td className="py-4 px-4">
                       <div className="space-y-2">
@@ -208,7 +211,7 @@ export default function RepoTable({ repositories }: RepoTableProps) {
                           </span>
                           {isTopRepo && (
                             <span className="px-2 py-0.5 text-[10px] font-mono bg-accent/20 text-accent rounded border border-accent/30">
-                              MOST STARRED
+                              FEATURED
                             </span>
                           )}
                           {isRecentRepo && (

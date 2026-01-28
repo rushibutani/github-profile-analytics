@@ -53,7 +53,7 @@ export function TableSkeleton() {
 
 export function DashboardSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <ProfileSkeleton />
       <div className="grid lg:grid-cols-2 gap-6">
         <ChartSkeleton />

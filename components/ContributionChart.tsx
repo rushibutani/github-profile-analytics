@@ -18,11 +18,14 @@ export default function ContributionChart({
   // Get month labels for the x-axis
   const monthLabels = getMonthLabels(contributions);
 
+  // Check if activity is low
+  const isLowActivity = contributions.totalContributions < 100;
+
   return (
     <div className="bg-background border border-border rounded-lg p-6 animate-slide-up">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-display font-bold text-foreground">
+          <h2 className="text-xl font-display font-extrabold text-foreground">
             Contribution Activity
           </h2>
           <div className="text-sm text-muted font-mono">

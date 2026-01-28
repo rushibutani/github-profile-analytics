@@ -2,13 +2,21 @@
 
 import { LanguageStats } from "../types/github";
 import { useState } from "react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
+} from "recharts";
 
 interface LanguageChartProps {
   languages: LanguageStats[];
 }
 
 export default function LanguageChart({ languages }: LanguageChartProps) {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   if (languages.length === 0) {
     return (
@@ -38,25 +46,13 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
     );
   }
 
-  // Calculate donut chart segments
-  const radius = 80;
-  const centerX = 100;
-  const centerY = 100;
-  const strokeWidth = 30;
-
-  let cumulativePercentage = 0;
-  const segments = languages.map((lang, index) => {
-    const startAngle = (cumulativePercentage / 100) * 360;
-    cumulativePercentage += lang.percentage;
-    const endAngle = (cumulativePercentage / 100) * 360;
-
-    return {
-      ...lang,
-      startAngle,
-      endAngle,
-      index,
-    };
-  });
+  // Transform data for Recharts
+  const chartData = languages.map((lang) => ({
+    name: lang.language,
+    value: lang.percentage,
+    bytes: lang.bytes,
+    color: lang.color,
+  }));
 
   // Determine primary language focus for insight
   const primaryLanguage = languages[0];
@@ -74,10 +70,25 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
     return `Versatile developer working with ${topTwo}`;
   };
 
+  // Custom tooltip for better UX
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-foreground text-background px-3 py-2 rounded shadow-lg text-xs">
+          <p className="font-bold">{data.name}</p>
+          <p>{data.value.toFixed(1)}%</p>
+          <p className="text-[10px] opacity-80">{formatBytes(data.bytes)}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="bg-background border border-border rounded-lg p-6 animate-slide-up">
       <div className="flex items-center gap-2 mb-6">
-        <h2 className="text-xl font-display font-bold text-foreground">
+        <h2 className="text-xl font-display font-extrabold text-foreground">
           Language Distribution
         </h2>
         <button
@@ -104,74 +115,35 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Donut Chart */}
+        {/* Recharts Donut Chart */}
         <div className="flex items-center justify-center">
-          <div className="relative w-[200px] h-[200px]">
-            <svg viewBox="0 0 200 200" className="transform -rotate-90">
-              {/* Background circle */}
-              <circle
-                cx={centerX}
-                cy={centerY}
-                r={radius}
-                fill="none"
-                stroke="rgba(255, 255, 255, 0.05)"
-                strokeWidth={strokeWidth}
-              />
-
-              {/* Language segments */}
-              {segments.map((segment) => {
-                const largeArc =
-                  segment.endAngle - segment.startAngle > 180 ? 1 : 0;
-                const startX =
-                  centerX +
-                  radius * Math.cos((segment.startAngle * Math.PI) / 180);
-                const startY =
-                  centerY +
-                  radius * Math.sin((segment.startAngle * Math.PI) / 180);
-                const endX =
-                  centerX +
-                  radius * Math.cos((segment.endAngle * Math.PI) / 180);
-                const endY =
-                  centerY +
-                  radius * Math.sin((segment.endAngle * Math.PI) / 180);
-
-                return (
-                  <path
-                    key={segment.language}
-                    d={`M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArc} 1 ${endX} ${endY}`}
-                    fill="none"
-                    stroke={segment.color}
-                    strokeWidth={strokeWidth}
-                    className="transition-all cursor-pointer"
-                    style={{
-                      opacity:
-                        hoveredIndex === null || hoveredIndex === segment.index
-                          ? 1
-                          : 0.3,
-                      strokeWidth:
-                        hoveredIndex === segment.index
-                          ? strokeWidth + 4
-                          : strokeWidth,
-                    }}
-                    onMouseEnter={() => setHoveredIndex(segment.index)}
-                    onMouseLeave={() => setHoveredIndex(null)}
+          <ResponsiveContainer width="100%" height={200}>
+            <PieChart>
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={80}
+                paddingAngle={2}
+                dataKey="value"
+                onMouseEnter={(_, index) => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(null)}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.color}
+                    opacity={
+                      activeIndex === null || activeIndex === index ? 1 : 0.3
+                    }
+                    stroke="none"
                   />
-                );
-              })}
-            </svg>
-
-            {/* Center label */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-3xl font-mono font-bold text-foreground">
-                  {languages.length}
-                </div>
-                <div className="text-xs text-muted uppercase tracking-wider">
-                  Languages
-                </div>
-              </div>
-            </div>
-          </div>
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
 
         {/* Language List */}
@@ -182,12 +154,12 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
               className="flex items-center justify-between p-3 rounded-lg transition-all cursor-pointer"
               style={{
                 backgroundColor:
-                  hoveredIndex === index
+                  activeIndex === index
                     ? "rgba(255, 255, 255, 0.05)"
                     : "transparent",
               }}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
+              onMouseEnter={() => setActiveIndex(index)}
+              onMouseLeave={() => setActiveIndex(null)}
             >
               <div className="flex items-center gap-3">
                 <div
@@ -228,10 +200,10 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
             />
           </svg>
           <div>
-            <p className="font-medium text-foreground">
+            <p className="font-semibold text-foreground mb-1">
               {getLanguageInsight()}
             </p>
-            <p className="text-xs text-muted mt-1">
+            <p className="text-xs text-muted leading-relaxed">
               Distribution reflects codebase composition across all repositories
             </p>
           </div>

@@ -75,8 +75,9 @@ export default function HomePage() {
                 </svg>
                 GitHub Analytics
               </h1>
-              <p className="text-sm text-muted mt-1">
-                Actionable GitHub insights for developers and recruiters
+              <p className="text-sm text-muted mt-1.5 leading-relaxed">
+                Analyze contribution patterns, technology focus, and repository
+                health in one place.
               </p>
             </div>
 
@@ -156,7 +157,7 @@ export default function HomePage() {
         {!isPending && !error && !analytics && <EmptyState />}
 
         {!isPending && !error && analytics && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Profile Overview */}
             <ProfileCard profile={analytics.profile} />
 
@@ -179,7 +180,14 @@ export default function HomePage() {
       <footer className="border-t border-border mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted">
-            <p>Built with Next.js, TypeScript, and Tailwind CSS</p>
+            <div>
+              <p className="text-foreground/80 font-medium mb-1">
+                Built with Next.js, TypeScript, and Tailwind CSS.
+              </p>
+              <p className="text-xs">
+                Optimized for performance, clarity, and maintainability.
+              </p>
+            </div>
             <p>
               Data sourced from{" "}
               <a

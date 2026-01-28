@@ -1,6 +1,12 @@
 "use client";
 
 import { ActivityMetrics } from "../types/github";
+import {
+  RadialBarChart,
+  RadialBar,
+  ResponsiveContainer,
+  PolarAngleAxis,
+} from "recharts";
 
 interface ActivityScoreProps {
   activity: ActivityMetrics;
@@ -8,9 +14,6 @@ interface ActivityScoreProps {
 
 export default function ActivityScore({ activity }: ActivityScoreProps) {
   const scorePercentage = activity.score;
-  const circumference = 2 * Math.PI * 45;
-  const strokeDashoffset =
-    circumference - (scorePercentage / 100) * circumference;
 
   const getScoreColor = (score: number): string => {
     if (score >= 70) return "#00ff88";
@@ -42,12 +45,21 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
     return colors[level];
   };
 
+  // Prepare data for Recharts
+  const chartData = [
+    {
+      name: "Activity",
+      value: scorePercentage,
+      fill: getScoreColor(scorePercentage),
+    },
+  ];
+
   return (
     <div className="bg-background border border-border rounded-lg p-6 animate-slide-up">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-display font-bold text-foreground">
+            <h2 className="text-xl font-display font-extrabold text-foreground">
               Activity Score
             </h2>
             <button
@@ -73,7 +85,7 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
             </button>
           </div>
           <div
-            className={`text-sm font-medium ${getActivityLevelColor(activity.recentActivityLevel)}`}
+            className={`text-sm font-medium ${getActivityLevelColor(activity.recentActivityLevel)} opacity-80`}
           >
             {getActivityLevelLabel(activity.recentActivityLevel)}
           </div>
@@ -81,47 +93,43 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
 
         {/* Score Circle and Metrics Grid */}
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Circular Progress */}
-          <div className="flex items-center justify-center">
-            <div className="relative w-40 h-40">
-              <svg className="transform -rotate-90 w-full h-full">
-                {/* Background circle */}
-                <circle
-                  cx="80"
-                  cy="80"
-                  r="45"
-                  stroke="rgba(255, 255, 255, 0.05)"
-                  strokeWidth="10"
-                  fill="none"
+          {/* Recharts Radial Progress */}
+          <div className="flex items-center justify-center relative">
+            <ResponsiveContainer width={160} height={160}>
+              <RadialBarChart
+                cx="50%"
+                cy="50%"
+                innerRadius="70%"
+                outerRadius="100%"
+                data={chartData}
+                startAngle={90}
+                endAngle={-270}
+              >
+                <PolarAngleAxis
+                  type="number"
+                  domain={[0, 100]}
+                  angleAxisId={0}
+                  tick={false}
                 />
-                {/* Progress circle */}
-                <circle
-                  cx="80"
-                  cy="80"
-                  r="45"
-                  stroke={getScoreColor(scorePercentage)}
-                  strokeWidth="10"
-                  fill="none"
-                  strokeDasharray={circumference}
-                  strokeDashoffset={strokeDashoffset}
-                  strokeLinecap="round"
-                  className="transition-all duration-1000 ease-out"
-                  style={{
-                    filter: `drop-shadow(0 0 8px ${getScoreColor(scorePercentage)}40)`,
-                  }}
+                <RadialBar
+                  background={{ fill: "rgba(255, 255, 255, 0.03)" }}
+                  dataKey="value"
+                  cornerRadius={10}
+                  fill={getScoreColor(scorePercentage)}
+                  fillOpacity={0.6}
                 />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div
-                    className="text-4xl font-mono font-bold"
-                    style={{ color: getScoreColor(scorePercentage) }}
-                  >
-                    {scorePercentage}
-                  </div>
-                  <div className="text-xs text-muted uppercase tracking-wider">
-                    Score
-                  </div>
+              </RadialBarChart>
+            </ResponsiveContainer>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <div
+                  className="text-3xl font-mono font-medium opacity-70"
+                  style={{ color: getScoreColor(scorePercentage) }}
+                >
+                  {scorePercentage}
+                </div>
+                <div className="text-xs text-muted uppercase tracking-wider mt-1">
+                  Score
                 </div>
               </div>
             </div>
@@ -222,7 +230,7 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
         <div className="pt-4 border-t border-border">
           {activity.recentActivityLevel === "none" ||
           activity.recentActivityLevel === "low" ? (
-            <div className="flex items-start gap-2 p-3 bg-accent/5 rounded-lg border border-accent/20">
+            <div className="flex items-start gap-3 p-4 bg-accent/5 rounded-lg border border-accent/20">
               <svg
                 className="w-5 h-5 text-accent flex-shrink-0 mt-0.5"
                 fill="none"
@@ -236,10 +244,12 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <div className="text-xs text-foreground leading-relaxed">
-                <span className="font-medium">Low activity detected.</span> Push
-                code regularly, maintain active repositories, and engage with
-                the community to improve contribution insights.
+              <div className="text-sm text-foreground leading-relaxed space-y-2">
+                <p className="font-semibold">Low activity detected</p>
+                <p className="text-xs text-muted">
+                  Push code regularly, maintain active repositories, and engage
+                  with the community to improve contribution insights.
+                </p>
               </div>
             </div>
           ) : (
