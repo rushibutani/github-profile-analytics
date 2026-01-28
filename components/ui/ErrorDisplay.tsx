@@ -207,8 +207,8 @@ export function EmptyState() {
     "sindresorhus",
     "kentcdodds",
   ];
-  const randomExample =
-    exampleUsers[Math.floor(Math.random() * exampleUsers.length)];
+  // Use first example by default to avoid hydration mismatch
+  const randomExample = exampleUsers[0];
 
   return (
     <div className="bg-gradient-to-br from-card to-surface border border-border rounded-2xl p-12 text-center animate-fade-in shadow-lg">

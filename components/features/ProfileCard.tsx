@@ -23,6 +23,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
               src={profile.avatarUrl}
               alt={`${profile.name}'s avatar`}
               fill
+              sizes="(max-width: 640px) 80px, 96px"
               className="rounded-2xl object-cover ring-2 ring-border"
               priority
             />
