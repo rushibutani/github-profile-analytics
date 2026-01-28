@@ -1,6 +1,6 @@
 "use client";
 
-import { LanguageStats } from "../types/github";
+import { LanguageStats } from "../../types/github";
 import { useState } from "react";
 import {
   PieChart,
@@ -95,7 +95,11 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
 
       <div className="grid md:grid-cols-2 gap-8">
         {/* Recharts Donut Chart */}
-        <div className="flex items-center justify-center">
+        <div
+          className="flex items-center justify-center"
+          role="img"
+          aria-label="Language distribution pie chart"
+        >
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie
@@ -126,11 +130,15 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
         </div>
 
         {/* Language List */}
-        <div className="space-y-2 max-h-[280px] overflow-y-auto scrollbar-thin">
+        <div
+          className="space-y-2 max-h-[280px] overflow-y-auto scrollbar-thin"
+          role="list"
+          aria-label="Programming languages used"
+        >
           {languages.map((lang, index) => (
-            <div
+            <button
               key={lang.language}
-              className="flex items-center justify-between p-3 rounded-xl transition-all cursor-pointer hover:bg-surface-2"
+              className="w-full flex items-center justify-between p-3 rounded-xl transition-all cursor-pointer hover:bg-surface-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-surface-2"
               style={{
                 backgroundColor:
                   activeIndex === index
@@ -139,11 +147,16 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
               }}
               onMouseEnter={() => setActiveIndex(index)}
               onMouseLeave={() => setActiveIndex(null)}
+              onFocus={() => setActiveIndex(index)}
+              onBlur={() => setActiveIndex(null)}
+              aria-label={`${lang.language}: ${lang.percentage.toFixed(1)}% (${formatBytes(lang.bytes)})`}
+              role="listitem"
             >
               <div className="flex items-center gap-3">
                 <div
                   className="w-3 h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: lang.color }}
+                  aria-hidden="true"
                 />
                 <span className="text-sm font-medium text-foreground">
                   {lang.language}
@@ -157,7 +170,7 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
                   {lang.percentage.toFixed(1)}%
                 </span>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>

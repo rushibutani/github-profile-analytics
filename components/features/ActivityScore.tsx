@@ -1,6 +1,6 @@
 "use client";
 
-import { ActivityMetrics } from "../types/github";
+import { ActivityMetrics } from "../../types/github";
 import {
   RadialBarChart,
   RadialBar,
@@ -22,7 +22,7 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
   };
 
   const getActivityLevelLabel = (
-    level: ActivityMetrics["recentActivityLevel"],
+    level: ActivityMetrics["recentActivityLevel"]
   ): string => {
     const labels = {
       high: "Highly Active",
@@ -34,7 +34,7 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
   };
 
   const getActivityLevelColor = (
-    level: ActivityMetrics["recentActivityLevel"],
+    level: ActivityMetrics["recentActivityLevel"]
   ): string => {
     const colors = {
       high: "text-success",
@@ -71,7 +71,11 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
         {/* Score Circle and Metrics Grid */}
         <div className="grid md:grid-cols-2 gap-8">
           {/* Recharts Radial Progress */}
-          <div className="flex items-center justify-center relative">
+          <div
+            className="flex items-center justify-center relative"
+            role="img"
+            aria-label={`Activity score: ${scorePercentage} out of 100`}
+          >
             <ResponsiveContainer width={160} height={160}>
               <RadialBarChart
                 cx="50%"
@@ -102,10 +106,13 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
                 <div
                   className="text-4xl font-bold"
                   style={{ color: getScoreColor(scorePercentage) }}
+                  aria-hidden="true"
                 >
                   {scorePercentage}
                 </div>
-                <div className="text-xs text-muted mt-1">Score</div>
+                <div className="text-xs text-muted mt-1" aria-hidden="true">
+                  Score
+                </div>
               </div>
             </div>
           </div>

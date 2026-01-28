@@ -1,6 +1,6 @@
 "use client";
 
-import { ContributionCalendar } from "../types/github";
+import { ContributionCalendar } from "../../types/github";
 import { useState } from "react";
 
 interface ContributionChartProps {
@@ -66,9 +66,9 @@ export default function ContributionChart({
               {contributions.weeks.map((week, weekIndex) => (
                 <div key={weekIndex} className="flex flex-col gap-[3px]">
                   {week.contributionDays.map((day, dayIndex) => (
-                    <div
+                    <button
                       key={dayIndex}
-                      className="w-[12px] h-[12px] rounded-[2px] cursor-pointer transition-all hover:ring-2 hover:ring-primary/50 hover:scale-110"
+                      className="w-[12px] h-[12px] rounded-[2px] cursor-pointer transition-all hover:ring-2 hover:ring-primary/50 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:scale-110"
                       style={{
                         backgroundColor: getLevelColor(day.level),
                       }}
@@ -76,6 +76,11 @@ export default function ContributionChart({
                         setHoveredDay({ date: day.date, count: day.count })
                       }
                       onMouseLeave={() => setHoveredDay(null)}
+                      onFocus={() =>
+                        setHoveredDay({ date: day.date, count: day.count })
+                      }
+                      onBlur={() => setHoveredDay(null)}
+                      aria-label={`${day.count} contributions on ${formatDate(day.date)}`}
                       title={`${day.count} contributions on ${formatDate(day.date)}`}
                     />
                   ))}
@@ -86,7 +91,11 @@ export default function ContributionChart({
 
           {/* Tooltip */}
           {hoveredDay && (
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-foreground text-card px-3 py-2 rounded-lg text-xs whitespace-nowrap shadow-lg">
+            <div
+              className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-foreground text-card px-3 py-2 rounded-lg text-xs whitespace-nowrap shadow-lg z-10"
+              role="tooltip"
+              aria-live="polite"
+            >
               <div className="font-semibold">
                 {hoveredDay.count} contributions
               </div>
@@ -98,8 +107,14 @@ export default function ContributionChart({
         </div>
 
         {/* Legend */}
-        <div className="flex items-center justify-between pt-2 border-t border-border">
-          <div className="text-xs text-muted">Less</div>
+        <div
+          className="flex items-center justify-between pt-2 border-t border-border"
+          role="legend"
+          aria-label="Contribution intensity scale"
+        >
+          <div className="text-xs text-muted" aria-hidden="true">
+            Less
+          </div>
           <div className="flex gap-1">
             {[0, 1, 2, 3, 4].map((level) => (
               <div
@@ -108,10 +123,13 @@ export default function ContributionChart({
                 style={{
                   backgroundColor: getLevelColor(level as 0 | 1 | 2 | 3 | 4),
                 }}
+                aria-label={`Contribution level ${level}`}
               />
             ))}
           </div>
-          <div className="text-xs text-muted">More</div>
+          <div className="text-xs text-muted" aria-hidden="true">
+            More
+          </div>
         </div>
       </div>
     </div>
@@ -139,7 +157,7 @@ function formatDate(dateString: string): string {
 }
 
 function getMonthLabels(
-  contributions: ContributionCalendar,
+  contributions: ContributionCalendar
 ): Array<{ month: string; width: number }> {
   const labels: Array<{ month: string; width: number }> = [];
   let currentMonth = "";

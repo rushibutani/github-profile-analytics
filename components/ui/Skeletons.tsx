@@ -1,6 +1,6 @@
 export function ProfileSkeleton() {
   return (
-    <div className="bg-background border border-border rounded-lg p-6 animate-pulse">
+    <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 animate-pulse">
       <div className="flex flex-col sm:flex-row gap-6">
         <div className="w-24 h-24 sm:w-32 sm:h-32 bg-muted/20 rounded-lg" />
         <div className="flex-1 space-y-4">
@@ -25,7 +25,7 @@ export function ProfileSkeleton() {
 
 export function ChartSkeleton() {
   return (
-    <div className="bg-background border border-border rounded-lg p-6 animate-pulse">
+    <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm animate-pulse">
       <div className="flex items-center justify-between mb-4">
         <div className="h-6 bg-muted/20 rounded w-48" />
         <div className="h-4 bg-muted/20 rounded w-32" />
@@ -35,9 +35,18 @@ export function ChartSkeleton() {
   );
 }
 
+export function ActivityGridSkeleton() {
+  return (
+    <div className="grid lg:grid-cols-2 gap-6">
+      <ChartSkeleton />
+      <ChartSkeleton />
+    </div>
+  );
+}
+
 export function TableSkeleton() {
   return (
-    <div className="bg-background border border-border rounded-lg p-6 animate-pulse">
+    <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm animate-pulse">
       <div className="flex items-center justify-between mb-4">
         <div className="h-6 bg-muted/20 rounded w-48" />
         <div className="h-10 bg-muted/20 rounded w-64" />

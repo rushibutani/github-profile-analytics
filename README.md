@@ -9,6 +9,7 @@ A production-ready, enterprise-grade GitHub profile analytics dashboard built wi
 ## ✨ Features
 
 ### Core Analytics
+
 - **Profile Overview**: Display user avatar, bio, followers, following, and account age
 - **Contribution Heatmap**: 12-month contribution activity visualization with interactive tooltips
 - **Language Distribution**: Donut chart showing programming language usage across repositories
@@ -16,6 +17,7 @@ A production-ready, enterprise-grade GitHub profile analytics dashboard built wi
 - **Activity Score**: Composite metric based on contributions, stars, and recent activity
 
 ### User Experience
+
 - **Server-Side Rendering**: Fast initial page loads with Next.js App Router
 - **Skeleton Loaders**: Professional loading states (no spinners)
 - **Error Handling**: Graceful error messages with retry functionality
@@ -24,6 +26,7 @@ A production-ready, enterprise-grade GitHub profile analytics dashboard built wi
 - **Empty States**: Meaningful placeholders for new/inactive profiles
 
 ### Technical Excellence
+
 - **Type Safety**: Full TypeScript coverage with strict mode
 - **Clean Architecture**: Separation of concerns (API → Transformers → Components)
 - **Performance**: Server Components for data fetching, Client Components only where needed
@@ -58,18 +61,21 @@ app/
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 18+ and npm/yarn/pnpm
 - GitHub account (for API testing)
 
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd github-analytics
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 # or
@@ -78,13 +84,36 @@ yarn install
 pnpm install
 ```
 
-3. (Optional) Add GitHub Personal Access Token for higher rate limits:
+3. **(Recommended) Configure GitHub Token for Production:**
+
+This app uses GitHub's REST API with the following limits:
+
+- **Without token:** 60 requests/hour (2-3 searches)
+- **With token:** 5,000 requests/hour (hundreds of searches)
+
+For production deployment, add a GitHub Personal Access Token:
+
 ```bash
 # Create .env.local file
-echo "GITHUB_TOKEN=your_github_token_here" > .env.local
+cp .env.local.example .env.local
 ```
 
+Then add your token to `.env.local`:
+
+```bash
+GITHUB_TOKEN=ghp_your_token_here
+```
+
+**How to create a token:**
+
+1. Go to GitHub Settings → Developer Settings → Personal Access Tokens → Tokens (classic)
+2. Generate new token (no special scopes needed for public data)
+3. Copy and paste into `.env.local`
+
+⚠️ **Security Note:** The token is used **server-side only** and never exposed to the browser. It's automatically ignored by git.
+
 4. Run the development server:
+
 ```bash
 npm run dev
 # or
@@ -115,18 +144,23 @@ This dashboard follows a **refined data-visualization aesthetic** inspired by pr
 ## 🔧 Key Technical Decisions
 
 ### 1. Server Components First
+
 All data fetching happens server-side for better performance and SEO. Client components are only used for interactivity (charts, filters).
 
 ### 2. Progressive Enhancement
+
 The app works without JavaScript for initial load, with enhanced functionality when JS is available.
 
 ### 3. Data Transformation Layer
+
 Raw GitHub API responses are transformed server-side into UI-ready data structures, minimizing client payload.
 
 ### 4. Synthetic Contribution Data
+
 GitHub's contribution graph requires GraphQL API or web scraping. We generate synthetic data based on repository push activity for demonstration purposes.
 
 ### 5. Rate Limiting Strategy
+
 - Cache API responses for 1 hour
 - Display friendly error messages when rate limited
 - Option to add GitHub token for 5000 req/hour (vs 60 unauthenticated)
@@ -145,9 +179,9 @@ Try these GitHub profiles to see the dashboard in action:
 
 The activity score (0-100) is a composite metric:
 
-- **40 points**: Contribution frequency (total contributions / 500 * 40)
-- **30 points**: Community impact (total stars / 100 * 30)
-- **30 points**: Recent activity (active repos / 10 * 30)
+- **40 points**: Contribution frequency (total contributions / 500 \* 40)
+- **30 points**: Community impact (total stars / 100 \* 30)
+- **30 points**: Recent activity (active repos / 10 \* 30)
 
 **Note**: This is an engagement metric, not a talent rating.
 
@@ -181,13 +215,34 @@ The activity score (0-100) is a composite metric:
 
 ## 📝 Environment Variables
 
-```bash
-# Optional: Increases rate limit from 60 to 5000 requests/hour
-GITHUB_TOKEN=your_personal_access_token
+### GitHub API Token (Recommended for Production)
 
-# Optional: Custom API base URL
-NEXT_PUBLIC_GITHUB_API_URL=https://api.github.com
+```bash
+# .env.local (never commit this file)
+GITHUB_TOKEN=ghp_your_personal_access_token
 ```
+
+**Why use a token?**
+
+- **Without token:** 60 API requests/hour (very limited, ~2 searches)
+- **With token:** 5,000 requests/hour (production-ready, hundreds of searches)
+
+**Security Guarantees:**
+
+- ✅ Token used **server-side only** (Server Components, Server Actions)
+- ✅ Never sent to browser or exposed in client code
+- ✅ Automatically excluded from git via `.gitignore`
+- ✅ Optional - app works without it (degraded experience)
+
+**Creating a Token:**
+
+1. GitHub Settings → Developer Settings → Personal Access Tokens → Tokens (classic)
+2. Click "Generate new token (classic)"
+3. **No scopes needed** - public data only
+4. Copy token and add to `.env.local`
+
+**For Deployment (Vercel/Netlify):**
+Add `GITHUB_TOKEN` as an environment variable in your hosting platform's dashboard.
 
 ## 🤝 Contributing
 

@@ -1,7 +1,5 @@
-"use client";
-
 import Image from "next/image";
-import { ProfileData } from "../types/github";
+import { ProfileData } from "../../types/github";
 
 interface ProfileCardProps {
   profile: ProfileData;
@@ -34,7 +32,8 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
               href={profile.profileUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted hover:text-foreground transition-colors text-sm font-medium inline-flex items-center gap-1"
+              className="text-muted hover:text-foreground transition-colors text-sm font-medium inline-flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-primary/50 rounded"
+              aria-label={`Visit ${profile.username}'s GitHub profile`}
             >
               @{profile.username}
               <svg
@@ -42,6 +41,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"

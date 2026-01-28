@@ -94,7 +94,7 @@ export interface ActivityMetrics {
   totalContributions: number;
   averageContributionsPerMonth: number;
   mostActiveMonth: string;
-  recentActivityLevel: 'high' | 'medium' | 'low' | 'none';
+  recentActivityLevel: "high" | "medium" | "low" | "none";
   totalStars: number;
   activeReposCount: number;
 }
@@ -110,5 +110,5 @@ export interface GitHubAnalytics {
 export interface ApiError {
   message: string;
   status: number;
-  type: 'not_found' | 'rate_limit' | 'server_error' | 'network_error';
+  type: "not_found" | "rate_limit" | "server_error" | "network_error";
 }
