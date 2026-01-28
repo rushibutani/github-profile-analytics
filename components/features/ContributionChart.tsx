@@ -2,6 +2,9 @@
 
 import { ContributionCalendar } from "../../types/github";
 import { useState } from "react";
+import { getLevelColor } from "../../lib/utils/color-helpers";
+import { formatDate } from "../../lib/utils/formatting";
+import { Card } from "../ui";
 
 interface ContributionChartProps {
   contributions: ContributionCalendar;
@@ -22,7 +25,7 @@ export default function ContributionChart({
   const isLowActivity = contributions.totalContributions < 100;
 
   return (
-    <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+    <Card variant="interactive">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium text-foreground/90">
@@ -132,28 +135,8 @@ export default function ContributionChart({
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
-}
-
-function getLevelColor(level: 0 | 1 | 2 | 3 | 4): string {
-  const colors = {
-    0: "rgba(255, 255, 255, 0.03)",
-    1: "rgba(100, 116, 139, 0.3)", // muted slate
-    2: "rgba(100, 116, 139, 0.5)",
-    3: "rgba(100, 116, 139, 0.7)",
-    4: "rgba(34, 197, 94, 0.6)", // accent only for highest
-  };
-  return colors[level];
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
 }
 
 function getMonthLabels(

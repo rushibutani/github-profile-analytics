@@ -10,6 +10,8 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { formatBytes } from "../../lib/utils/formatting";
+import { Card, EmptyState } from "../ui";
 
 interface LanguageChartProps {
   languages: LanguageStats[];
@@ -20,14 +22,16 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
 
   if (languages.length === 0) {
     return (
-      <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+      <Card>
         <h2 className="text-lg font-medium text-foreground/90 mb-4">
           Language Distribution
         </h2>
-        <div className="flex items-center justify-center h-48 text-muted">
-          <div className="text-center space-y-2">
+        <EmptyState
+          size="md"
+          title="No language data available"
+          icon={
             <svg
-              className="w-12 h-12 mx-auto opacity-30"
+              className="w-12 h-12"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -39,10 +43,9 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
                 d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
               />
             </svg>
-            <p className="text-sm">No language data available</p>
-          </div>
-        </div>
-      </div>
+          }
+        />
+      </Card>
     );
   }
 
@@ -86,7 +89,7 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
   };
 
   return (
-    <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+    <Card variant="interactive">
       <div className="mb-6">
         <h2 className="text-lg font-medium text-foreground/90">
           Language Distribution
@@ -179,14 +182,6 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
       <div className="mt-6 pt-4 border-t border-border">
         <p className="text-sm text-muted">{getLanguageInsight()}</p>
       </div>
-    </div>
+    </Card>
   );
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 }

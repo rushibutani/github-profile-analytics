@@ -1,15 +1,15 @@
 "use client";
 
-import { RepositoryDisplay } from "../../types/github";
-import { useState, useMemo, useCallback } from "react";
+import { RepositoryDisplay } from "../../../types/github";
+import { useState, useCallback } from "react";
 import RepoRow from "./RepoRow";
 import RepoTableHeader from "./RepoTableHeader";
+import { useFilteredRepos, SortOption } from "../../../lib/hooks";
+import { Card, EmptyState } from "../../ui";
 
 interface RepoTableProps {
   repositories: RepositoryDisplay[];
 }
-
-type SortOption = "stars" | "recent";
 
 export default function RepoTable({ repositories }: RepoTableProps) {
   const [sortBy, setSortBy] = useState<SortOption>("stars");
@@ -24,47 +24,26 @@ export default function RepoTable({ repositories }: RepoTableProps) {
     setSearchQuery(query);
   }, []);
 
-  // Memoize filtered and sorted repos
-  const sortedAndFilteredRepos = useMemo(() => {
-    let filtered = repositories;
-
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (repo) =>
-          repo.name.toLowerCase().includes(query) ||
-          repo.description.toLowerCase().includes(query) ||
-          repo.language.toLowerCase().includes(query)
-      );
-    }
-
-    // Apply sorting
-    if (sortBy === "stars") {
-      return [...filtered].sort((a, b) => b.stars - a.stars);
-    } else {
-      return [...filtered].sort(
-        (a, b) =>
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-      );
-    }
-  }, [repositories, sortBy, searchQuery]);
+  // Use custom hook for filtering and sorting
+  const sortedAndFilteredRepos = useFilteredRepos(
+    repositories,
+    searchQuery,
+    sortBy
+  );
 
   if (repositories.length === 0) {
     return (
-      <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+      <Card>
         <h2 className="text-lg font-medium text-foreground/90 mb-4">
           Repository Insights
         </h2>
-        <div className="flex items-center justify-center h-32 text-muted">
-          <p className="text-sm">No public repositories found</p>
-        </div>
-      </div>
+        <EmptyState size="sm" title="No public repositories found" />
+      </Card>
     );
   }
 
   return (
-    <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+    <Card variant="interactive">
       <div className="space-y-4">
         {/* Header - Memoized Component */}
         <RepoTableHeader
@@ -122,24 +101,23 @@ export default function RepoTable({ repositories }: RepoTableProps) {
               </tr>
             </thead>
             <tbody>
-              {sortedAndFilteredRepos.map((repo, index) => (
-                <RepoRow
-                  key={repo.id}
-                  repo={repo}
-                  index={index}
-                  sortBy={sortBy}
-                />
-              ))}
+              {sortedAndFilteredRepos.map((repo, index) => {
+                // Compute variant in parent to avoid prop drilling
+                let variant: "featured" | "latest" | "default" = "default";
+                if (index === 0) {
+                  variant = sortBy === "stars" ? "featured" : "latest";
+                }
+
+                return <RepoRow key={repo.id} repo={repo} variant={variant} />;
+              })}
             </tbody>
           </table>
         </div>
 
         {sortedAndFilteredRepos.length === 0 && (
-          <div className="text-center py-8 text-muted">
-            <p className="text-sm">No repositories match your search</p>
-          </div>
+          <EmptyState size="sm" title="No repositories match your search" />
         )}
       </div>
-    </div>
+    </Card>
   );
 }

@@ -1,5 +1,16 @@
+"use client";
+
 import { ApiError } from "../../types/github";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import {
+  SearchIcon,
+  RefreshIcon,
+  ChartIcon,
+  ArrowRightIcon,
+  SpinnerIcon,
+} from "./Icon";
 
 interface ErrorDisplayProps {
   error: ApiError;
@@ -7,6 +18,17 @@ interface ErrorDisplayProps {
 }
 
 export default function ErrorDisplay({ error, username }: ErrorDisplayProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [retryCount, setRetryCount] = useState(0);
+
+  const handleRetry = () => {
+    setRetryCount((prev) => prev + 1);
+    startTransition(() => {
+      router.refresh();
+    });
+  };
+
   const getErrorIcon = () => {
     switch (error.type) {
       case "not_found":
@@ -141,25 +163,35 @@ export default function ErrorDisplay({ error, username }: ErrorDisplayProps) {
             Search Again
           </Link>
           {username && error.type !== "not_found" && (
-            <Link
-              href={`/?user=${encodeURIComponent(username)}`}
-              className="px-6 py-3 bg-surface border border-border text-foreground font-medium rounded-xl hover:bg-surface-2 transition-all inline-flex items-center gap-2"
+            <button
+              onClick={handleRetry}
+              disabled={isPending}
+              className="px-6 py-3 bg-surface border border-border text-foreground font-medium rounded-xl hover:bg-surface-2 transition-all inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label={`Retry fetching profile for ${username}`}
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-              Retry
-            </Link>
+              {isPending ? (
+                <SpinnerIcon className="w-4 h-4" />
+              ) : (
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              )}
+              {isPending
+                ? "Retrying..."
+                : retryCount > 0
+                  ? `Retry (${retryCount})`
+                  : "Retry"}
+            </button>
           )}
         </div>
       </div>

@@ -6,6 +6,8 @@ import {
   ApiError,
 } from "../types/github";
 import { env } from "../env";
+import { retryWithBackoff } from "./utils/retry";
+import { logger } from "./utils/logger";
 
 const GITHUB_API_BASE = "https://api.github.com";
 
@@ -52,74 +54,88 @@ export class GitHubApiError extends Error {
 }
 
 async function fetchWithErrorHandling<T>(url: string): Promise<T> {
-  try {
-    const headers: HeadersInit = {
-      Accept: "application/vnd.github.v3+json",
-    };
+  return retryWithBackoff(
+    async () => {
+      try {
+        const headers: HeadersInit = {
+          Accept: "application/vnd.github.v3+json",
+        };
 
-    // Use GitHub token if available (increases rate limit from 60 to 5000/hour)
-    const token = env.GITHUB_TOKEN;
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
+        // Use GitHub token if available (increases rate limit from 60 to 5000/hour)
+        const token = env.GITHUB_TOKEN;
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
 
-    const response = await fetch(url, {
-      headers,
-      next: { revalidate: 3600 }, // Cache for 1 hour
-    });
+        const response = await fetch(url, {
+          headers,
+          next: { revalidate: 3600 }, // Cache for 1 hour
+        });
 
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new GitHubApiError("GitHub user not found", 404, "not_found");
-      }
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new GitHubApiError("GitHub user not found", 404, "not_found");
+          }
 
-      if (response.status === 403) {
-        const rateLimitRemaining = response.headers.get(
-          "X-RateLimit-Remaining"
-        );
-        const rateLimitReset = response.headers.get("X-RateLimit-Reset");
-        const rateLimitLimit = response.headers.get("X-RateLimit-Limit");
-
-        if (rateLimitRemaining === "0") {
-          let resetMessage = "";
-          if (rateLimitReset) {
-            const resetDate = new Date(Number(rateLimitReset) * 1000);
-            const minutesUntilReset = Math.ceil(
-              (resetDate.getTime() - Date.now()) / 60000
+          if (response.status === 403) {
+            const rateLimitRemaining = response.headers.get(
+              "X-RateLimit-Remaining"
             );
-            resetMessage =
-              minutesUntilReset > 0
-                ? ` Please try again in ${minutesUntilReset} minute${minutesUntilReset > 1 ? "s" : ""}.`
-                : " You can try searching again now.";
+            const rateLimitReset = response.headers.get("X-RateLimit-Reset");
+            const rateLimitLimit = response.headers.get("X-RateLimit-Limit");
+
+            if (rateLimitRemaining === "0") {
+              let resetMessage = "";
+              if (rateLimitReset) {
+                const resetDate = new Date(Number(rateLimitReset) * 1000);
+                const minutesUntilReset = Math.ceil(
+                  (resetDate.getTime() - Date.now()) / 60000
+                );
+                resetMessage =
+                  minutesUntilReset > 0
+                    ? ` Please try again in ${minutesUntilReset} minute${minutesUntilReset > 1 ? "s" : ""}.`
+                    : " You can try searching again now.";
+              }
+
+              throw new GitHubApiError(
+                `Too many searches right now.${resetMessage}`,
+                403,
+                "rate_limit"
+              );
+            }
           }
 
           throw new GitHubApiError(
-            `Too many searches right now.${resetMessage}`,
-            403,
-            "rate_limit"
+            `GitHub API error: ${response.statusText}`,
+            response.status,
+            "server_error"
           );
         }
+
+        return response.json();
+      } catch (error) {
+        if (error instanceof GitHubApiError) {
+          throw error;
+        }
+
+        throw new GitHubApiError(
+          "Failed to connect to GitHub API",
+          500,
+          "network_error"
+        );
       }
-
-      throw new GitHubApiError(
-        `GitHub API error: ${response.statusText}`,
-        response.status,
-        "server_error"
-      );
+    },
+    {
+      maxAttempts: 3,
+      onRetry: (attempt, error) => {
+        logger.info("Retrying GitHub API request", {
+          attempt,
+          url,
+          error: error.message,
+        });
+      },
     }
-
-    return response.json();
-  } catch (error) {
-    if (error instanceof GitHubApiError) {
-      throw error;
-    }
-
-    throw new GitHubApiError(
-      "Failed to connect to GitHub API",
-      500,
-      "network_error"
-    );
-  }
+  );
 }
 
 export async function fetchUserProfile(username: string): Promise<GitHubUser> {

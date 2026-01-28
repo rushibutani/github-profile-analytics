@@ -7,6 +7,12 @@ import {
   ResponsiveContainer,
   PolarAngleAxis,
 } from "recharts";
+import {
+  getScoreColor,
+  getActivityLevelLabel,
+  getActivityLevelColor,
+} from "../../lib/utils/activity-helpers";
+import { MetricCard, Card, InfoIcon } from "../ui";
 
 interface ActivityScoreProps {
   activity: ActivityMetrics;
@@ -14,36 +20,6 @@ interface ActivityScoreProps {
 
 export default function ActivityScore({ activity }: ActivityScoreProps) {
   const scorePercentage = activity.score;
-
-  const getScoreColor = (score: number): string => {
-    if (score >= 70) return "#22c55e";
-    if (score >= 40) return "#f59e0b";
-    return "#9ca3af";
-  };
-
-  const getActivityLevelLabel = (
-    level: ActivityMetrics["recentActivityLevel"]
-  ): string => {
-    const labels = {
-      high: "Highly Active",
-      medium: "Moderately Active",
-      low: "Low Activity",
-      none: "Low Activity",
-    };
-    return labels[level];
-  };
-
-  const getActivityLevelColor = (
-    level: ActivityMetrics["recentActivityLevel"]
-  ): string => {
-    const colors = {
-      high: "text-success",
-      medium: "text-warning",
-      low: "text-warning",
-      none: "text-muted",
-    };
-    return colors[level];
-  };
 
   // Prepare data for Recharts
   const chartData = [
@@ -55,7 +31,7 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
   ];
 
   return (
-    <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+    <Card variant="interactive">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium text-foreground/90">
@@ -212,19 +188,7 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
         {(activity.recentActivityLevel === "none" ||
           activity.recentActivityLevel === "low") && (
           <div className="flex items-start gap-3 p-4 bg-primary/5 rounded-xl border border-primary/10">
-            <svg
-              className="w-5 h-5 text-primary flex-shrink-0 mt-0.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <InfoIcon className="text-primary flex-shrink-0 mt-0.5" />
             <div className="text-sm text-foreground space-y-1">
               <p className="font-medium">Low activity detected</p>
               <p className="text-xs text-muted">
@@ -234,22 +198,6 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-interface MetricCardProps {
-  label: string;
-  value: string;
-  icon: React.ReactNode;
-}
-
-function MetricCard({ label, value, icon }: MetricCardProps) {
-  return (
-    <div className="space-y-2">
-      <div className="text-muted">{icon}</div>
-      <div className="text-xl font-bold text-foreground">{value}</div>
-      <div className="text-xs text-muted">{label}</div>
-    </div>
+    </Card>
   );
 }

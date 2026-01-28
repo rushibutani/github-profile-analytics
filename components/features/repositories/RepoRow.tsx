@@ -1,17 +1,21 @@
 import { memo } from "react";
-import { RepositoryDisplay } from "../../types/github";
+import { RepositoryDisplay } from "../../../types/github";
+import { STALENESS_DAYS } from "../../../lib/constants/thresholds";
+import { Badge } from "../../ui";
 
 interface RepoRowProps {
   repo: RepositoryDisplay;
-  index: number;
-  sortBy: "stars" | "recent";
+  variant?: "featured" | "latest" | "default";
 }
 
 // Memoized row component to prevent unnecessary re-renders
-const RepoRow = memo(function RepoRow({ repo, index, sortBy }: RepoRowProps) {
+const RepoRow = memo(function RepoRow({
+  repo,
+  variant = "default",
+}: RepoRowProps) {
   const status = getRepoStatus(repo);
-  const isTopRepo = index === 0 && sortBy === "stars";
-  const isRecentRepo = index === 0 && sortBy === "recent";
+  const isTopRepo = variant === "featured";
+  const isRecentRepo = variant === "latest";
   const isArchived = status.label === "Archived";
 
   return (
@@ -42,20 +46,8 @@ const RepoRow = memo(function RepoRow({ repo, index, sortBy }: RepoRowProps) {
               )}
               {repo.name}
             </a>
-            <span
-              className={`px-2 py-0.5 text-[10px] font-mono rounded border ${status.color}`}
-              aria-label={`Repository status: ${status.label}`}
-            >
-              {status.label}
-            </span>
-            {isTopRepo && (
-              <span
-                className="px-2 py-0.5 text-[10px] font-mono bg-accent/20 text-accent rounded border border-accent/30"
-                aria-label="Featured repository"
-              >
-                FEATURED
-              </span>
-            )}
+            <Badge variant={status.variant as any}>{status.label}</Badge>
+            {isTopRepo && <Badge variant="featured">FEATURED</Badge>}
             {isRecentRepo && (
               <span
                 className="px-2 py-0.5 text-[10px] font-mono bg-accent/20 text-accent rounded border border-accent/30"
@@ -135,31 +127,31 @@ const RepoRow = memo(function RepoRow({ repo, index, sortBy }: RepoRowProps) {
 
 function getRepoStatus(repo: RepositoryDisplay): {
   label: string;
-  color: string;
+  variant: string;
 } {
   const daysSinceUpdate = Math.floor(
     (Date.now() - new Date(repo.updatedAt).getTime()) / (1000 * 60 * 60 * 24)
   );
 
-  if (daysSinceUpdate < 30) {
+  if (daysSinceUpdate < STALENESS_DAYS.ACTIVE) {
     return {
       label: "Active",
-      color: "bg-success/10 text-success border-success/20",
+      variant: "active",
     };
-  } else if (daysSinceUpdate < 180) {
+  } else if (daysSinceUpdate < STALENESS_DAYS.MODERATE) {
     return {
       label: "Maintained",
-      color: "bg-primary/10 text-primary border-primary/20",
+      variant: "moderate",
     };
   } else if (daysSinceUpdate < 365) {
     return {
       label: "Stale",
-      color: "bg-warning/10 text-warning border-warning/20",
+      variant: "stale",
     };
   } else {
     return {
       label: "Archived",
-      color: "bg-muted/10 text-muted border-muted/20",
+      variant: "archived",
     };
   }
 }

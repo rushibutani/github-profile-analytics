@@ -9,6 +9,8 @@ import {
 } from "../../lib/github-api";
 import { transformGitHubData } from "../../lib/transformers";
 import { GitHubAnalytics, ApiError } from "../../types/github";
+import { REPO_LIMITS } from "../../lib/constants/thresholds";
+import { logger } from "../../lib/utils/logger";
 
 export interface FetchProgress {
   stage: "profile" | "repos" | "languages" | "contributions" | "complete";
@@ -22,20 +24,22 @@ export async function fetchGitHubAnalytics(username: string): Promise<{
   error?: ApiError;
   progress?: FetchProgress;
 }> {
+  let cleanUsername = username; // Declare in outer scope for error logging
+
   try {
     // Validate input
     if (!username || username.trim().length === 0) {
       return {
         error: {
-          message: "Please enter a valid GitHub username",
+          message: "Please enter a GitHub username",
           status: 400,
           type: "not_found",
         },
       };
     }
 
-    // Sanitize username
-    const cleanUsername = username.trim().replace(/[^a-zA-Z0-9-]/g, "");
+    // Sanitize username to prevent injection
+    cleanUsername = username.trim().replace(/[^a-zA-Z0-9-]/g, "");
 
     if (cleanUsername !== username.trim()) {
       return {
@@ -48,6 +52,7 @@ export async function fetchGitHubAnalytics(username: string): Promise<{
     }
 
     // Fetch user profile
+    logger.info("Fetching GitHub profile", { username: cleanUsername });
     const user = await fetchUserProfile(cleanUsername);
 
     // Fetch repositories
@@ -57,9 +62,11 @@ export async function fetchGitHubAnalytics(username: string): Promise<{
     const languagesData = new Map<string, Record<string, number>>();
     const nonForkedRepos = repositories.filter((repo) => !repo.fork);
 
-    // Limit to top 10 repos to conserve API rate limit (60/hour without token)
-    // With a GitHub token, you get 5000/hour, so this is very conservative
-    const reposToAnalyze = nonForkedRepos.slice(0, 10);
+    // Limit to top repos to conserve API rate limit
+    const reposToAnalyze = nonForkedRepos.slice(
+      0,
+      REPO_LIMITS.API_ANALYSIS_LIMIT
+    );
 
     // Track language fetching progress
     let completedRepos = 0;
@@ -80,8 +87,12 @@ export async function fetchGitHubAnalytics(username: string): Promise<{
         languagesData.set(repo.full_name, languages);
         completedRepos++;
       } catch (error) {
-        // Skip repositories with language fetch errors (timeout or API error)
-        // This is expected behavior - some repos may not have language data
+        // Log but don't fail - some repos may not have language data
+        logger.warn("Failed to fetch repository languages", {
+          username: cleanUsername,
+          repo: repo.name,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
         completedRepos++;
       }
     });
@@ -111,6 +122,11 @@ export async function fetchGitHubAnalytics(username: string): Promise<{
     return { data: analytics };
   } catch (error) {
     if (error instanceof GitHubApiError) {
+      logger.error("GitHub API error", error, {
+        username: cleanUsername,
+        status: error.status,
+        type: error.type,
+      });
       return {
         error: {
           message: error.message,
@@ -120,6 +136,9 @@ export async function fetchGitHubAnalytics(username: string): Promise<{
       };
     }
 
+    logger.error("Unexpected error in fetchGitHubAnalytics", error as Error, {
+      username: cleanUsername,
+    });
     return {
       error: {
         message: "An unexpected error occurred",

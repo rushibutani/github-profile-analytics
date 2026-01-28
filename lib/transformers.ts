@@ -9,36 +9,13 @@ import {
   ContributionCalendar,
 } from "../types/github";
 import { getLanguageColor } from "./github-api";
-
-/**
- * Calculate account age in human-readable format
- */
-function calculateAccountAge(createdAt: string): string {
-  const created = new Date(createdAt);
-  const now = new Date();
-  const diffTime = Math.abs(now.getTime() - created.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  const years = Math.floor(diffDays / 365);
-  const months = Math.floor((diffDays % 365) / 30);
-
-  if (years > 0) {
-    return months > 0 ? `${years}y ${months}mo` : `${years}y`;
-  }
-  return months > 0 ? `${months}mo` : `${diffDays}d`;
-}
-
-/**
- * Format date to readable string
- */
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
+import { formatDate, calculateAccountAge } from "./utils/formatting";
+import {
+  REPO_LIMITS,
+  STALENESS_DAYS,
+  ACTIVITY_LEVEL_THRESHOLDS,
+  ACTIVITY_SCORE_WEIGHTS,
+} from "./constants/thresholds";
 
 /**
  * Check if repository is stale (not updated in 6+ months)
@@ -114,7 +91,7 @@ export function aggregateLanguageStats(
       color: getLanguageColor(language),
     }))
     .sort((a, b) => b.percentage - a.percentage)
-    .slice(0, 10); // Top 10 languages
+    .slice(0, REPO_LIMITS.DISPLAY_TOP_LANGUAGES);
 
   return stats;
 }
@@ -193,17 +170,30 @@ export function calculateActivityMetrics(
 
   // Determine recent activity level
   let recentActivityLevel: ActivityMetrics["recentActivityLevel"] = "none";
-  if (averageContributionsPerMonth > 50) recentActivityLevel = "high";
-  else if (averageContributionsPerMonth > 20) recentActivityLevel = "medium";
-  else if (averageContributionsPerMonth > 5) recentActivityLevel = "low";
+  if (averageContributionsPerMonth > ACTIVITY_LEVEL_THRESHOLDS.HIGH)
+    recentActivityLevel = "high";
+  else if (averageContributionsPerMonth > ACTIVITY_LEVEL_THRESHOLDS.MEDIUM)
+    recentActivityLevel = "medium";
+  else if (averageContributionsPerMonth > ACTIVITY_LEVEL_THRESHOLDS.LOW)
+    recentActivityLevel = "low";
 
   // Calculate composite activity score (0-100)
   const contributionScore = Math.min(
-    (contributions.totalContributions / 500) * 40,
-    40
+    (contributions.totalContributions /
+      ACTIVITY_SCORE_WEIGHTS.CONTRIBUTION_DIVISOR) *
+      ACTIVITY_SCORE_WEIGHTS.CONTRIBUTION_MAX,
+    ACTIVITY_SCORE_WEIGHTS.CONTRIBUTION_MAX
   );
-  const starScore = Math.min((totalStars / 100) * 30, 30);
-  const recentActivityScore = Math.min((activeRepos.length / 10) * 30, 30);
+  const starScore = Math.min(
+    (totalStars / ACTIVITY_SCORE_WEIGHTS.STAR_DIVISOR) *
+      ACTIVITY_SCORE_WEIGHTS.STAR_MAX,
+    ACTIVITY_SCORE_WEIGHTS.STAR_MAX
+  );
+  const recentActivityScore = Math.min(
+    (activeRepos.length / ACTIVITY_SCORE_WEIGHTS.RECENT_ACTIVITY_DIVISOR) *
+      ACTIVITY_SCORE_WEIGHTS.RECENT_ACTIVITY_MAX,
+    ACTIVITY_SCORE_WEIGHTS.RECENT_ACTIVITY_MAX
+  );
 
   const score = Math.round(contributionScore + starScore + recentActivityScore);
 
