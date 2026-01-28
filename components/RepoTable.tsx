@@ -20,22 +20,22 @@ function getRepoStatus(repo: RepositoryDisplay): {
   if (daysSinceUpdate < 30) {
     return {
       label: "Active",
-      color: "bg-green-500/10 text-green-400 border-green-500/20",
+      color: "bg-success/10 text-success border-success/20",
     };
   } else if (daysSinceUpdate < 180) {
     return {
       label: "Maintained",
-      color: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+      color: "bg-primary/10 text-primary border-primary/20",
     };
   } else if (daysSinceUpdate < 365) {
     return {
       label: "Stale",
-      color: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+      color: "bg-warning/10 text-warning border-warning/20",
     };
   } else {
     return {
       label: "Archived",
-      color: "bg-muted/20 text-muted border-muted/20",
+      color: "bg-muted/10 text-muted border-muted/20",
     };
   }
 }
@@ -71,8 +71,8 @@ export default function RepoTable({ repositories }: RepoTableProps) {
 
   if (repositories.length === 0) {
     return (
-      <div className="bg-background border border-border rounded-lg p-6">
-        <h2 className="text-xl font-display font-bold text-foreground mb-4">
+      <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+        <h2 className="text-lg font-medium text-foreground/90 mb-4">
           Repository Insights
         </h2>
         <div className="flex items-center justify-center h-32 text-muted">
@@ -83,16 +83,17 @@ export default function RepoTable({ repositories }: RepoTableProps) {
   }
 
   return (
-    <div className="bg-background border border-border rounded-lg p-6 animate-slide-up">
+    <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
       <div className="space-y-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-display font-extrabold text-foreground">
-              Repository Insights
+            <h2 className="text-lg font-medium text-foreground/90">
+              Top Repositories
             </h2>
-            <p className="text-xs text-muted mt-1.5">
-              Showcasing public work, sorted by impact and recency
+            <p className="text-xs text-muted mt-1">
+              Public repositories sorted by{" "}
+              {sortBy === "stars" ? "stars" : "activity"}
             </p>
           </div>
 
@@ -104,7 +105,7 @@ export default function RepoTable({ repositories }: RepoTableProps) {
                 placeholder="Search repositories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full sm:w-64 px-4 py-2 pl-10 bg-background border border-border rounded-lg text-sm text-foreground placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all"
+                className="w-full sm:w-64 px-4 py-2 pl-10 bg-background border border-border rounded-xl text-sm text-foreground placeholder-muted/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
               <svg
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted"
@@ -122,12 +123,12 @@ export default function RepoTable({ repositories }: RepoTableProps) {
             </div>
 
             {/* Sort Filter */}
-            <div className="flex gap-2 bg-background border border-border rounded-lg p-1">
+            <div className="flex gap-1 bg-surface/50 border border-border/50 rounded-xl p-1">
               <button
                 onClick={() => setSortBy("stars")}
-                className={`px-3 py-1 text-xs font-medium rounded transition-all ${
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                   sortBy === "stars"
-                    ? "bg-accent text-background"
+                    ? "bg-primary text-background shadow-sm"
                     : "text-muted hover:text-foreground"
                 }`}
               >
@@ -135,9 +136,9 @@ export default function RepoTable({ repositories }: RepoTableProps) {
               </button>
               <button
                 onClick={() => setSortBy("recent")}
-                className={`px-3 py-1 text-xs font-medium rounded transition-all ${
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                   sortBy === "recent"
-                    ? "bg-accent text-background"
+                    ? "bg-primary text-background shadow-sm"
                     : "text-muted hover:text-foreground"
                 }`}
               >
@@ -148,7 +149,7 @@ export default function RepoTable({ repositories }: RepoTableProps) {
         </div>
 
         {/* Results count */}
-        <div className="text-xs text-muted font-mono">
+        <div className="text-xs text-muted">
           Showing {sortedAndFilteredRepos.length} of {repositories.length}{" "}
           repositories
         </div>
@@ -158,19 +159,19 @@ export default function RepoTable({ repositories }: RepoTableProps) {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left py-3 px-4 text-xs font-medium text-muted uppercase tracking-wider">
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted">
                   Repository
                 </th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-muted uppercase tracking-wider hidden md:table-cell">
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted hidden md:table-cell">
                   Language
                 </th>
-                <th className="text-right py-3 px-4 text-xs font-medium text-muted uppercase tracking-wider">
+                <th className="text-right py-3 px-4 text-xs font-medium text-muted">
                   Stars
                 </th>
-                <th className="text-right py-3 px-4 text-xs font-medium text-muted uppercase tracking-wider hidden sm:table-cell">
+                <th className="text-right py-3 px-4 text-xs font-medium text-muted hidden sm:table-cell">
                   Forks
                 </th>
-                <th className="text-right py-3 px-4 text-xs font-medium text-muted uppercase tracking-wider hidden lg:table-cell">
+                <th className="text-right py-3 px-4 text-xs font-medium text-muted hidden lg:table-cell">
                   Updated
                 </th>
               </tr>
@@ -185,10 +186,8 @@ export default function RepoTable({ repositories }: RepoTableProps) {
                 return (
                   <tr
                     key={repo.id}
-                    className={`border-b border-border/50 hover:bg-accent/5 transition-colors ${
-                      isTopRepo || isRecentRepo
-                        ? "bg-accent/5 ring-1 ring-accent/10"
-                        : ""
+                    className={`border-b border-border/50 hover:bg-surface-2 transition-colors ${
+                      isTopRepo || isRecentRepo ? "bg-accent-bg" : ""
                     } ${isArchived ? "opacity-50" : ""}`}
                   >
                     <td className="py-4 px-4">
@@ -198,8 +197,15 @@ export default function RepoTable({ repositories }: RepoTableProps) {
                             href={repo.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-medium text-accent hover:text-accent/80 transition-colors flex items-center gap-2"
+                            className={`text-sm font-medium transition-colors flex items-center gap-2 ${
+                              isTopRepo || isRecentRepo
+                                ? "text-primary hover:text-primary/80"
+                                : "text-foreground hover:text-foreground/80"
+                            }`}
                           >
+                            {(isTopRepo || isRecentRepo) && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                            )}
                             {repo.name}
                           </a>
                           <span

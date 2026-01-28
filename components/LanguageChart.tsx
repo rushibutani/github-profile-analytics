@@ -20,14 +20,14 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
 
   if (languages.length === 0) {
     return (
-      <div className="bg-background border border-border rounded-lg p-6 animate-slide-up">
-        <h2 className="text-xl font-display font-bold text-foreground mb-4">
+      <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+        <h2 className="text-lg font-medium text-foreground/90 mb-4">
           Language Distribution
         </h2>
-        <div className="flex items-center justify-center h-64 text-muted">
+        <div className="flex items-center justify-center h-48 text-muted">
           <div className="text-center space-y-2">
             <svg
-              className="w-16 h-16 mx-auto opacity-50"
+              className="w-12 h-12 mx-auto opacity-30"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -70,15 +70,15 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
     return `Versatile developer working with ${topTwo}`;
   };
 
-  // Custom tooltip for better UX
+  // Custom tooltip
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-foreground text-background px-3 py-2 rounded shadow-lg text-xs">
-          <p className="font-bold">{data.name}</p>
+        <div className="bg-foreground text-card px-3 py-2 rounded-lg shadow-lg text-xs">
+          <p className="font-semibold">{data.name}</p>
           <p>{data.value.toFixed(1)}%</p>
-          <p className="text-[10px] opacity-80">{formatBytes(data.bytes)}</p>
+          <p className="text-[10px] opacity-75">{formatBytes(data.bytes)}</p>
         </div>
       );
     }
@@ -86,32 +86,11 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
   };
 
   return (
-    <div className="bg-background border border-border rounded-lg p-6 animate-slide-up">
-      <div className="flex items-center gap-2 mb-6">
-        <h2 className="text-xl font-display font-extrabold text-foreground">
+    <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+      <div className="mb-6">
+        <h2 className="text-lg font-medium text-foreground/90">
           Language Distribution
         </h2>
-        <button
-          className="group relative text-muted hover:text-foreground transition-colors"
-          title="What this chart shows"
-        >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-foreground text-background text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-            Based on code bytes across repositories
-          </span>
-        </button>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
@@ -151,7 +130,7 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
           {languages.map((lang, index) => (
             <div
               key={lang.language}
-              className="flex items-center justify-between p-3 rounded-lg transition-all cursor-pointer"
+              className="flex items-center justify-between p-3 rounded-xl transition-all cursor-pointer hover:bg-surface-2"
               style={{
                 backgroundColor:
                   activeIndex === index
@@ -163,7 +142,7 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
             >
               <div className="flex items-center gap-3">
                 <div
-                  className="w-4 h-4 rounded-full flex-shrink-0"
+                  className="w-3 h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: lang.color }}
                 />
                 <span className="text-sm font-medium text-foreground">
@@ -171,10 +150,10 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-xs text-muted font-mono">
+                <span className="text-xs text-muted">
                   {formatBytes(lang.bytes)}
                 </span>
-                <span className="text-sm font-mono font-bold text-accent min-w-[50px] text-right">
+                <span className="text-sm font-semibold text-foreground min-w-[50px] text-right">
                   {lang.percentage.toFixed(1)}%
                 </span>
               </div>
@@ -185,29 +164,7 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
 
       {/* Insight */}
       <div className="mt-6 pt-4 border-t border-border">
-        <div className="flex items-start gap-2 text-sm">
-          <svg
-            className="w-5 h-5 text-accent flex-shrink-0 mt-0.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-            />
-          </svg>
-          <div>
-            <p className="font-semibold text-foreground mb-1">
-              {getLanguageInsight()}
-            </p>
-            <p className="text-xs text-muted leading-relaxed">
-              Distribution reflects codebase composition across all repositories
-            </p>
-          </div>
-        </div>
+        <p className="text-sm text-muted">{getLanguageInsight()}</p>
       </div>
     </div>
   );

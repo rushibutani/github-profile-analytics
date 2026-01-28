@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { ProfileData } from "../types/github";
-import Tooltip from "./Tooltip";
 
 interface ProfileCardProps {
   profile: ProfileData;
@@ -10,16 +9,16 @@ interface ProfileCardProps {
 
 export default function ProfileCard({ profile }: ProfileCardProps) {
   return (
-    <div className="bg-background border border-border rounded-lg p-6 animate-fade-in">
+    <div className="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex flex-col sm:flex-row gap-6">
         {/* Avatar */}
         <div className="flex-shrink-0">
-          <div className="relative w-24 h-24 sm:w-32 sm:h-32">
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24">
             <Image
               src={profile.avatarUrl}
               alt={`${profile.name}'s avatar`}
               fill
-              className="rounded-lg object-cover ring-2 ring-accent/20"
+              className="rounded-2xl object-cover ring-2 ring-border"
               priority
             />
           </div>
@@ -28,16 +27,29 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
         {/* Profile Info */}
         <div className="flex-1 space-y-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
               {profile.name}
             </h1>
             <a
               href={profile.profileUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-accent hover:text-accent/80 transition-colors font-mono text-sm"
+              className="text-muted hover:text-foreground transition-colors text-sm font-medium inline-flex items-center gap-1"
             >
               @{profile.username}
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
+              </svg>
             </a>
           </div>
 
@@ -48,12 +60,10 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
           )}
 
           {/* Metadata Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-border">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
             <MetricCard
               label="Followers"
-              sublabel="Community Reach"
               value={profile.followers.toLocaleString()}
-              tooltip="Number of users following this profile"
             />
             <MetricCard
               label="Following"
@@ -61,23 +71,17 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
             />
             <MetricCard
               label="Repositories"
-              sublabel="Public Work"
               value={profile.publicRepos.toLocaleString()}
-              tooltip="Publicly visible repositories"
             />
-            <MetricCard
-              label="Member Since"
-              value={profile.accountAge}
-              tooltip="Account age and experience"
-            />
+            <MetricCard label="Joined" value={profile.accountAge} />
           </div>
 
           {/* Additional Info */}
-          <div className="flex flex-wrap gap-4 pt-2 text-xs text-muted">
+          <div className="flex flex-wrap gap-3 pt-2 text-xs text-muted">
             {profile.location && (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5 bg-surface px-3 py-1.5 rounded-lg">
                 <svg
-                  className="w-4 h-4"
+                  className="w-3.5 h-3.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -99,9 +103,9 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
               </div>
             )}
             {profile.company && (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5 bg-surface px-3 py-1.5 rounded-lg">
                 <svg
-                  className="w-4 h-4"
+                  className="w-3.5 h-3.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -116,9 +120,9 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
                 <span>{profile.company}</span>
               </div>
             )}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5 bg-surface px-3 py-1.5 rounded-lg">
               <svg
-                className="w-4 h-4"
+                className="w-3.5 h-3.5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -142,22 +146,15 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
 interface MetricCardProps {
   label: string;
   value: string;
-  sublabel?: string;
-  tooltip?: string;
 }
 
-function MetricCard({ label, value, sublabel, tooltip }: MetricCardProps) {
+function MetricCard({ label, value }: MetricCardProps) {
   return (
     <div className="space-y-1">
-      <div className="text-2xl font-mono font-bold text-foreground">
+      <div className="text-xl sm:text-2xl font-bold text-foreground">
         {value}
       </div>
-      <div className="flex items-center gap-1">
-        <div className="text-xs text-muted uppercase tracking-wider">
-          {sublabel || label}
-        </div>
-        {tooltip && <Tooltip text={tooltip} />}
-      </div>
+      <div className="text-xs text-muted">{label}</div>
     </div>
   );
 }

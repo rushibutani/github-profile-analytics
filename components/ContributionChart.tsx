@@ -22,38 +22,16 @@ export default function ContributionChart({
   const isLowActivity = contributions.totalContributions < 100;
 
   return (
-    <div className="bg-background border border-border rounded-lg p-6 animate-slide-up">
+    <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-display font-extrabold text-foreground">
+          <h2 className="text-lg font-medium text-foreground/90">
             Contribution Activity
           </h2>
-          <div className="text-sm text-muted font-mono">
-            {contributions.totalContributions.toLocaleString()} contributions in
-            the last year
+          <div className="text-sm text-muted">
+            {contributions.totalContributions.toLocaleString()} contributions
           </div>
         </div>
-
-        {/* Helper Text */}
-        <p className="text-xs text-muted leading-relaxed flex items-start gap-2">
-          <svg
-            className="w-4 h-4 flex-shrink-0 mt-0.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span>
-            Each square represents a day. Darker colors indicate more
-            contributions on that date.
-          </span>
-        </p>
 
         {/* Heatmap */}
         <div className="relative">
@@ -90,7 +68,7 @@ export default function ContributionChart({
                   {week.contributionDays.map((day, dayIndex) => (
                     <div
                       key={dayIndex}
-                      className="w-[12px] h-[12px] rounded-sm cursor-pointer transition-all hover:ring-2 hover:ring-accent"
+                      className="w-[12px] h-[12px] rounded-[2px] cursor-pointer transition-all hover:ring-2 hover:ring-primary/50 hover:scale-110"
                       style={{
                         backgroundColor: getLevelColor(day.level),
                       }}
@@ -108,9 +86,11 @@ export default function ContributionChart({
 
           {/* Tooltip */}
           {hoveredDay && (
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-foreground text-background px-3 py-2 rounded text-xs font-mono whitespace-nowrap shadow-lg">
-              <div className="font-bold">{hoveredDay.count} contributions</div>
-              <div className="text-[10px] opacity-80">
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-foreground text-card px-3 py-2 rounded-lg text-xs whitespace-nowrap shadow-lg">
+              <div className="font-semibold">
+                {hoveredDay.count} contributions
+              </div>
+              <div className="text-[10px] opacity-75">
                 {formatDate(hoveredDay.date)}
               </div>
             </div>
@@ -140,11 +120,11 @@ export default function ContributionChart({
 
 function getLevelColor(level: 0 | 1 | 2 | 3 | 4): string {
   const colors = {
-    0: "rgba(255, 255, 255, 0.05)",
-    1: "rgba(0, 255, 136, 0.2)",
-    2: "rgba(0, 255, 136, 0.4)",
-    3: "rgba(0, 255, 136, 0.6)",
-    4: "rgba(0, 255, 136, 0.9)",
+    0: "rgba(255, 255, 255, 0.03)",
+    1: "rgba(100, 116, 139, 0.3)", // muted slate
+    2: "rgba(100, 116, 139, 0.5)",
+    3: "rgba(100, 116, 139, 0.7)",
+    4: "rgba(34, 197, 94, 0.6)", // accent only for highest
   };
   return colors[level];
 }

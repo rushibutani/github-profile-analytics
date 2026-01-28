@@ -16,9 +16,9 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
   const scorePercentage = activity.score;
 
   const getScoreColor = (score: number): string => {
-    if (score >= 70) return "#00ff88";
-    if (score >= 40) return "#fbbf24";
-    return "#94a3b8";
+    if (score >= 70) return "#22c55e";
+    if (score >= 40) return "#f59e0b";
+    return "#9ca3af";
   };
 
   const getActivityLevelLabel = (
@@ -37,9 +37,9 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
     level: ActivityMetrics["recentActivityLevel"],
   ): string => {
     const colors = {
-      high: "text-green-400",
-      medium: "text-yellow-400",
-      low: "text-orange-400",
+      high: "text-success",
+      medium: "text-warning",
+      low: "text-warning",
       none: "text-muted",
     };
     return colors[level];
@@ -55,37 +55,14 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
   ];
 
   return (
-    <div className="bg-background border border-border rounded-lg p-6 animate-slide-up">
+    <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-display font-extrabold text-foreground">
-              Activity Score
-            </h2>
-            <button
-              className="group relative text-muted hover:text-foreground transition-colors"
-              title="Learn about activity score"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-foreground text-background text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                Composite metric based on contributions
-              </span>
-            </button>
-          </div>
+          <h2 className="text-lg font-medium text-foreground/90">
+            Activity Score
+          </h2>
           <div
-            className={`text-sm font-medium ${getActivityLevelColor(activity.recentActivityLevel)} opacity-80`}
+            className={`text-sm font-medium ${getActivityLevelColor(activity.recentActivityLevel)}`}
           >
             {getActivityLevelLabel(activity.recentActivityLevel)}
           </div>
@@ -112,25 +89,23 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
                   tick={false}
                 />
                 <RadialBar
-                  background={{ fill: "rgba(255, 255, 255, 0.03)" }}
+                  background={{ fill: "rgba(255, 255, 255, 0.05)" }}
                   dataKey="value"
                   cornerRadius={10}
                   fill={getScoreColor(scorePercentage)}
-                  fillOpacity={0.6}
+                  fillOpacity={0.9}
                 />
               </RadialBarChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
                 <div
-                  className="text-3xl font-mono font-medium opacity-70"
+                  className="text-4xl font-bold"
                   style={{ color: getScoreColor(scorePercentage) }}
                 >
                   {scorePercentage}
                 </div>
-                <div className="text-xs text-muted uppercase tracking-wider mt-1">
-                  Score
-                </div>
+                <div className="text-xs text-muted mt-1">Score</div>
               </div>
             </div>
           </div>
@@ -218,51 +193,39 @@ export default function ActivityScore({ activity }: ActivityScoreProps) {
 
         {/* Most Active Month */}
         <div className="pt-4 border-t border-border">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted">Most Active Month</span>
-            <span className="text-sm font-mono font-bold text-accent">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted">Most Active Month</span>
+            <span className="font-semibold text-foreground">
               {activity.mostActiveMonth}
             </span>
           </div>
         </div>
 
         {/* Guidance Message */}
-        <div className="pt-4 border-t border-border">
-          {activity.recentActivityLevel === "none" ||
-          activity.recentActivityLevel === "low" ? (
-            <div className="flex items-start gap-3 p-4 bg-accent/5 rounded-lg border border-accent/20">
-              <svg
-                className="w-5 h-5 text-accent flex-shrink-0 mt-0.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <div className="text-sm text-foreground leading-relaxed space-y-2">
-                <p className="font-semibold">Low activity detected</p>
-                <p className="text-xs text-muted">
-                  Push code regularly, maintain active repositories, and engage
-                  with the community to improve contribution insights.
-                </p>
-              </div>
+        {(activity.recentActivityLevel === "none" ||
+          activity.recentActivityLevel === "low") && (
+          <div className="flex items-start gap-3 p-4 bg-primary/5 rounded-xl border border-primary/10">
+            <svg
+              className="w-5 h-5 text-primary flex-shrink-0 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <div className="text-sm text-foreground space-y-1">
+              <p className="font-medium">Low activity detected</p>
+              <p className="text-xs text-muted">
+                Regular contributions help build a stronger profile
+              </p>
             </div>
-          ) : (
-            <p className="text-xs text-muted leading-relaxed">
-              <span className="font-medium text-foreground">
-                About this score:
-              </span>{" "}
-              Reflects platform activity patterns including contribution
-              frequency, repository maintenance, and community engagement. This
-              metric measures GitHub activity, not developer capability.
-            </p>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -276,12 +239,10 @@ interface MetricCardProps {
 
 function MetricCard({ label, value, icon }: MetricCardProps) {
   return (
-    <div className="p-4 bg-accent/5 rounded-lg border border-border/50 space-y-2">
+    <div className="space-y-2">
       <div className="text-muted">{icon}</div>
-      <div className="text-2xl font-mono font-bold text-foreground">
-        {value}
-      </div>
-      <div className="text-xs text-muted uppercase tracking-wider">{label}</div>
+      <div className="text-xl font-bold text-foreground">{value}</div>
+      <div className="text-xs text-muted">{label}</div>
     </div>
   );
 }
