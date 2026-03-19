@@ -2,19 +2,26 @@
 
 import { LanguageStats } from "../../types/github";
 import { useState } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  Legend,
-} from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { formatBytes } from "../../lib/utils/formatting";
 import { Card, EmptyState } from "../ui";
 
 interface LanguageChartProps {
   languages: LanguageStats[];
+}
+
+function CustomTooltip({ active, payload }: any) {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-foreground text-card px-3 py-2 rounded-lg shadow-lg text-xs">
+        <p className="font-semibold">{data.name}</p>
+        <p>{data.value.toFixed(1)}%</p>
+        <p className="text-[10px] opacity-75">{formatBytes(data.bytes)}</p>
+      </div>
+    );
+  }
+  return null;
 }
 
 export default function LanguageChart({ languages }: LanguageChartProps) {
@@ -71,21 +78,6 @@ export default function LanguageChart({ languages }: LanguageChartProps) {
       .map((l) => l.language)
       .join(" and ");
     return `Versatile developer working with ${topTwo}`;
-  };
-
-  // Custom tooltip
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-foreground text-card px-3 py-2 rounded-lg shadow-lg text-xs">
-          <p className="font-semibold">{data.name}</p>
-          <p>{data.value.toFixed(1)}%</p>
-          <p className="text-[10px] opacity-75">{formatBytes(data.bytes)}</p>
-        </div>
-      );
-    }
-    return null;
   };
 
   return (

@@ -68,14 +68,7 @@ export default function ClientPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  // Fetch analytics when username changes
-  useEffect(() => {
-    if (username) {
-      fetchAnalytics(username);
-    }
-  }, []);
-
-  const fetchAnalytics = async (user: string) => {
+  async function fetchAnalytics(user: string) {
     setPageState("loading");
     setError(null);
 
@@ -98,12 +91,21 @@ export default function ClientPage() {
       }
     } catch (err) {
       setError({
-        type: "unknown",
+        type: "server_error",
+        status: 500,
         message: "An unexpected error occurred",
       });
       setPageState("error");
     }
-  };
+  }
+
+  // Fetch analytics when username changes
+  useEffect(() => {
+    if (username) {
+      fetchAnalytics(username);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
